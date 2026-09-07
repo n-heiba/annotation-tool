@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+
+# OS/editor cruft
+.DS_Store
+.vscode/
+.idea/
