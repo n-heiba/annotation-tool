@@ -1,3 +1,15 @@
-import { definePrismaConfig } from "prisma/config"
+import { loadEnvFile } from "node:process"
+import { defineConfig, env } from "prisma/config"
 
-export default definePrismaConfig({})
+try {
+  loadEnvFile();
+} catch {
+
+}
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  datasource: {
+    url: env("DATABASE_URL"),
+  },
+})

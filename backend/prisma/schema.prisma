@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Audio {
+  id        String   @id @default(uuid())
+  filename  String
+  path      String
+  mimeType  String
+  sizeBytes Int
+  // pending | queued | rejected | in_progress | done
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+
+  transcript         Transcript?
+  recordingCondition RecordingCondition?
+}
+
+model Transcript {
+  id            String   @id @default(uuid())
+  audioId       String   @unique
+  originalText  String
+  correctedText String
+  createdAt     DateTime @default(now())
+
+  audio Audio            @relation(fields: [audioId], references: [id])
+  spans AnnotationSpan[]
+}
+
+model AnnotationSpan {
+  id           String   @id @default(uuid())
+  transcriptId String
+  startOffset  Int
+  endOffset    Int
+  // number | formatting commands | spelled out | named entity | measurement | medical term
+  type         String
+  attributes   Json
+  createdAt    DateTime @default(now())
+
+  transcript Transcript @relation(fields: [transcriptId], references: [id])
+}
+
+model RecordingCondition {
+  id                 String  @id @default(uuid())
+  audioId            String  @unique
+  durationSeconds    Float
+  sampleRate         Int
+  channels           Int
+  bitDepth           Int?
+  metadataRaw        Json?
+  speechRateWpm      Float?
+  speechRateOverride Float?
+  distanceEstimate   Float?
+  distanceOverride   Float?
+
+  audio Audio @relation(fields: [audioId], references: [id])
+}
