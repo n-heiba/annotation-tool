@@ -8,6 +8,8 @@ interface TranscriptInput {
   label: string
 }
 
+// POST /api/transcripts/upload
+// Body: { transcripts: [{ path, label }, ...] }
 router.post("/upload", async (req, res) => {
   const body = req.body
 
@@ -83,6 +85,47 @@ router.post("/upload", async (req, res) => {
     .map((a) => a.filename)
 
   res.json({ matched, unmatchedTranscripts, unmatchedAudio, invalid: badItems })
+})
+
+// GET /api/transcripts/:audioId
+router.get("/:audioId", async (req, res) => {
+  const { audioId } = req.params
+
+  const transcript = await prisma.transcript.findUnique({ where: { audioId } })
+
+  if (!transcript) {
+    return res.status(404).json({ error: `No transcript found for audio ${audioId}` })
+  }
+
+  res.json({
+    id: transcript.id,
+    audioId: transcript.audioId,
+    originalText: transcript.originalText,
+    correctedText: transcript.correctedText
+  })
+})
+
+// PATCH /api/transcripts/:audioId
+router.patch("/:audioId", async (req, res) => {
+  const { audioId } = req.params
+  const { correctedText } = req.body
+
+  if (typeof correctedText !== "string") {
+    return res.status(400).json({ error: "correctedText must be a string" })
+  }
+
+  const transcript = await prisma.transcript.findUnique({ where: { audioId } })
+
+  if (!transcript) {
+    return res.status(404).json({ error: `No transcript found for audio ${audioId}` })
+  }
+
+  const updated = await prisma.transcript.update({
+    where: { audioId },
+    data: { correctedText }
+  })
+
+  res.json({ id: updated.id, audioId: updated.audioId, correctedText: updated.correctedText })
 })
 
 export default router
