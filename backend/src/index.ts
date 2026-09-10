@@ -2,6 +2,7 @@ import "./env.js"
 import express from "express"
 import audioRoutes from "./routes/audio.js"
 import transcriptRoutes from "./routes/transcripts.js"
+import queueRoutes from "./routes/queue.js"
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -15,6 +16,8 @@ app.get("/health", (req, res) => {
 app.use("/api/audio", audioRoutes)
 
 app.use("/api/transcripts", transcriptRoutes)
+
+app.use("/api/queue", queueRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
