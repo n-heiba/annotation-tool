@@ -23,6 +23,7 @@ router.get("/", async (req, res) => {
   const results = items.map((item) => ({
     id: item.id,
     filename: item.filename,
+    path: item.path,
     status: item.status,
     durationSeconds: item.recordingCondition?.durationSeconds ?? null,
     annotator: null

@@ -5,14 +5,14 @@ import { randomUUID } from "node:crypto"
 import { mkdir } from "node:fs/promises"
 import path from "node:path"
 import { prisma } from "../lib/prisma.js"
-import { calculateSpeechRate, estimateDistance } from "../lib/recording-conditions.js"
+import { estimateDistance } from "../lib/recording-conditions.js"
+import { routeByDuration } from "../lib/annotation-logic.js"
 
 const router = Router()
 
 const ALLOWED_MIME_TYPES = new Set(["audio/wav", "audio/x-wav", "audio/mpeg", "audio/mp4", "audio/x-m4a", "application/octet-stream"])
 const ALLOWED_EXTENSIONS = new Set([".wav", ".mp3", ".m4a"])
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024
-const REJECT_THRESHOLD_SECONDS = 15
 const UPLOAD_DIR = path.join(process.cwd(), "uploads", "audio")
 
 const upload = multer({
@@ -58,7 +58,7 @@ router.post("/upload", upload.array("files"), async (req, res) => {
       const channels = metadata.format.numberOfChannels ?? 0
       const bitDepth = metadata.format.bitsPerSample ?? null
 
-      const status = durationSeconds <= REJECT_THRESHOLD_SECONDS ? "rejected" : "pending"
+      const status = routeByDuration(durationSeconds)
 
       const audio = await prisma.audio.create({
         data: {
