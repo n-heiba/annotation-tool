@@ -9,8 +9,8 @@ const FILES = [
   "german-tts-5.wav"
 ]
 
-async function main() {
-  console.log(`Uploading ${FILES.length} sample files to ${SERVER_URL}...`)
+async function uploadAudio() {
+  console.log(`Uploading ${FILES.length} sample audio files...`)
 
   const form = new FormData()
 
@@ -33,7 +33,28 @@ async function main() {
   })
 
   const result = await response.json()
-  console.log(JSON.stringify(result, null, 2))
+  console.log("Audio upload result:", JSON.stringify(result, null, 2))
+}
+
+async function uploadTranscripts() {
+  console.log("Uploading sample transcripts...")
+
+  const transcriptsFile = Bun.file(`${SEED_AUDIO_DIR}/transcripts.json`)
+  const transcripts = await transcriptsFile.json()
+
+  const response = await fetch(`${SERVER_URL}/api/transcripts/upload`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ transcripts })
+  })
+
+  const result = await response.json()
+  console.log("Transcript upload result:", JSON.stringify(result, null, 2))
+}
+
+async function main() {
+  await uploadAudio()
+  await uploadTranscripts()
 }
 
 main().catch((err) => {

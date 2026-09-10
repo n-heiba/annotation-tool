@@ -1,0 +1,22 @@
+[
+  {
+    "path": "audio/german-tts.wav",
+    "label": "Single-Shot-Antibiose mit Cefuroxim eintausendfuenfhundert Milligramm neue Zeile Prolene sechs null fortlaufend."
+  },
+  {
+    "path": "audio/german-tts-2.wav",
+    "label": "Patientin erhielt zwoelf Milligramm Morphin intravenoes."
+  },
+  {
+    "path": "audio/german-tts-3.wav",
+    "label": "Kontrolle des Verbandes und Uebergabe an die Stationsschwester."
+  },
+  {
+    "path": "audio/german-tts-4.wav",
+    "label": "Single-Shot-Antibiose mit Cefuroxim eintausendfuenfhundert Milligramm neue Zeile Prolene sechs null fortlaufend. Patientin erhielt zwoelf Milligramm Morphin intravenoes zur Schmerzkontrolle. Kontrolle des Verbandes und Uebergabe an die Stationsschwester erfolgte um vierzehn Uhr dreissig."
+  },
+  {
+    "path": "audio/german-tts-5.wav",
+    "label": "Herr Mueller wurde am zwoelften Maerz in der Chirurgie aufgenommen. Diagnose: akute Appendizitis. Der Patient erhielt sechshundert Milligramm Ibuprofen sowie eine Infusion von fuenfhundert Milliliter Kochsalzloesung. Blutdruck einhundertzwanzig zu achtzig, Puls zweiundachtzig pro Minute."
+  }
+]
