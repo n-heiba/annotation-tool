@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test"
-import { routeByDuration, normalizeMeasurement } from "../src/lib/annotation-logic.js"
+import { routeByDuration, normalizeMeasurement, extractFilename } from "../src/lib/annotation-logic.js"
 
 describe("15-second routing rule", () => {
   test("rejects audio at exactly 15 seconds", () => {
@@ -47,3 +47,18 @@ describe("unit normalization", () => {
     expect(normalizeMeasurement(500, "IE")).toBe(500)
   })
 })
+
+describe("pairing logic - filename extraction", () => {
+  test("extracts filename from a path with a folder prefix", () => {
+    expect(extractFilename("audio/880_NTX.wav")).toBe("880_NTX.wav")
+  })
+
+  test("extracts filename from a nested path", () => {
+    expect(extractFilename("recordings/2026/09/clip-01.wav")).toBe("clip-01.wav")
+  })
+
+  test("returns the input unchanged when there is no folder prefix", () => {
+    expect(extractFilename("clip-01.wav")).toBe("clip-01.wav")
+  })
+})
+

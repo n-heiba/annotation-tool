@@ -14,3 +14,7 @@ export function normalizeMeasurement(value: number, unit: string): number {
   if (unit in LENGTH_TO_CM) return value * (LENGTH_TO_CM[unit] as number)
   return value
 }
+
+export function extractFilename(transcriptPath: string): string {
+  return transcriptPath.split("/").pop() ?? transcriptPath
+}

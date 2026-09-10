@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { prisma } from "../lib/prisma.js"
 import { calculateSpeechRate } from "../lib/recording-conditions.js"
+import { extractFilename } from "../lib/annotation-logic.js"
 
 const router = Router()
 
@@ -52,7 +53,7 @@ router.post("/upload", async (req, res) => {
   const unmatchedTranscripts: string[] = []
 
   for (const item of validItems) {
-    const filename = item.path.split("/").pop() ?? item.path
+    const filename = extractFilename(item.path)
 
     const audio = await prisma.audio.findFirst({
       where: { filename },
