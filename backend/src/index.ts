@@ -1,11 +1,20 @@
-import express from 'express'
+import "./env.js"
+import express from "express"
+import audioRoutes from "./routes/audio.js"
+import transcriptRoutes from "./routes/transcripts.js"
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' })
+app.use(express.json())
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" })
 })
+
+app.use("/api/audio", audioRoutes)
+
+app.use("/api/transcripts", transcriptRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
