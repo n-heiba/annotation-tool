@@ -1,5 +1,6 @@
 import { Router } from "express"
 import { prisma } from "../lib/prisma.js"
+import { calculateSpeechRate } from "../lib/recording-conditions.js"
 
 const router = Router()
 
@@ -77,6 +78,15 @@ router.post("/upload", async (req, res) => {
     })
 
     matched.push({ path: item.path, audioId: audio.id })
+
+    const recordingCondition = await prisma.recordingCondition.findUnique({ where: { audioId: audio.id } })
+    if (recordingCondition) {
+      const speechRateWpm = calculateSpeechRate(item.label, recordingCondition.durationSeconds)
+      await prisma.recordingCondition.update({
+        where: { audioId: audio.id },
+        data: { speechRateWpm }
+      })
+    }
   }
 
   const allAudio = await prisma.audio.findMany({ include: { transcript: true } })

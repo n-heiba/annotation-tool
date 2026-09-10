@@ -1,12 +1,13 @@
-import { Router } from "express";
-import multer from "multer";
-import { parseFile } from "music-metadata";
-import { randomUUID } from "node:crypto";
-import { mkdir } from "node:fs/promises";
-import path from "node:path";
-import { prisma } from "../lib/prisma.js";
+import { Router } from "express"
+import multer from "multer"
+import { parseFile } from "music-metadata"
+import { randomUUID } from "node:crypto"
+import { mkdir } from "node:fs/promises"
+import path from "node:path"
+import { prisma } from "../lib/prisma.js"
+import { calculateSpeechRate, estimateDistance } from "../lib/recording-conditions.js"
 
-const router = Router();
+const router = Router()
 
 const ALLOWED_MIME_TYPES = new Set(["audio/wav", "audio/x-wav", "audio/mpeg", "audio/mp4", "audio/x-m4a", "application/octet-stream"])
 const ALLOWED_EXTENSIONS = new Set([".wav", ".mp3", ".m4a"])
@@ -17,18 +18,18 @@ const UPLOAD_DIR = path.join(process.cwd(), "uploads", "audio")
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE_BYTES },
-});
+})
 
 router.post("/upload", upload.array("files"), async (req, res) => {
-  const files = req.files as Express.Multer.File[] | undefined;
+  const files = req.files as Express.Multer.File[] | undefined
 
   if (!files || files.length === 0) {
     return res.status(400).json({ error: "No files provided under field 'files'." });
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
+  await mkdir(UPLOAD_DIR, { recursive: true })
 
-  const results = [];
+  const results = []
 
   for (const file of files) {
     const ext = path.extname(file.originalname).toLowerCase()
@@ -45,19 +46,19 @@ router.post("/upload", upload.array("files"), async (req, res) => {
     }
 
     try {
-      const storedFilename = `${randomUUID()}-${file.originalname}`;
-      const destPath = path.join(UPLOAD_DIR, storedFilename);
+      const storedFilename = `${randomUUID()}-${file.originalname}`
+      const destPath = path.join(UPLOAD_DIR, storedFilename)
 
-      const { writeFile } = await import("node:fs/promises");
-      await writeFile(destPath, file.buffer);
+      const { writeFile } = await import("node:fs/promises")
+      await writeFile(destPath, file.buffer)
 
-      const metadata = await parseFile(destPath);
-      const durationSeconds = metadata.format.duration ?? 0;
-      const sampleRate = metadata.format.sampleRate ?? 0;
-      const channels = metadata.format.numberOfChannels ?? 0;
-      const bitDepth = metadata.format.bitsPerSample ?? null;
+      const metadata = await parseFile(destPath)
+      const durationSeconds = metadata.format.duration ?? 0
+      const sampleRate = metadata.format.sampleRate ?? 0
+      const channels = metadata.format.numberOfChannels ?? 0
+      const bitDepth = metadata.format.bitsPerSample ?? null
 
-      const status = durationSeconds <= REJECT_THRESHOLD_SECONDS ? "rejected" : "pending";
+      const status = durationSeconds <= REJECT_THRESHOLD_SECONDS ? "rejected" : "pending"
 
       const audio = await prisma.audio.create({
         data: {
@@ -67,17 +68,13 @@ router.post("/upload", upload.array("files"), async (req, res) => {
           sizeBytes: file.size,
           status,
         },
-      });
+      })
+
+      const distanceEstimate = await estimateDistance(destPath)
 
       await prisma.recordingCondition.create({
-        data: {
-          audioId: audio.id,
-          durationSeconds,
-          sampleRate,
-          channels,
-          bitDepth,
-        },
-      });
+        data: { audioId: audio.id, durationSeconds, sampleRate, channels, bitDepth, distanceEstimate }
+      })
 
       results.push({ filename: file.originalname, status, audioId: audio.id, durationSeconds });
     } catch (err) {
@@ -85,11 +82,11 @@ router.post("/upload", upload.array("files"), async (req, res) => {
         filename: file.originalname,
         status: "rejected",
         reason: `Failed to process file: ${(err as Error).message}`,
-      });
+      })
     }
   }
 
-  res.json({ results });
-});
+  res.json({ results })
+})
 
-export default router;
+export default router
